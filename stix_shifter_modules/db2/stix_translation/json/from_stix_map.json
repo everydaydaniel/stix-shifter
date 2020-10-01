@@ -1,0 +1,7 @@
+{
+  "ipv4-addr": {
+    "fields": {
+      "value": ["SIP", "DIP"]
+    }
+  }
+}
