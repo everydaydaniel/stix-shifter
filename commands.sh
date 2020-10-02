@@ -1,0 +1,1 @@
+python main.py transmit db2 '{"host":"zen-cpd-zen.cp4docpcluster-8bd82ab93bc861f858890126d8105068-0001.us-east.containers.appdomain.cloud", "port":31490}' '{"auth": {"username": "user999", "password": "v?dT?3r-435PX_iT", "database": "bigsql"}}' ping
