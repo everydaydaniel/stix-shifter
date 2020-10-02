@@ -1,42 +1,45 @@
 {
-    "connection": {
-        "type": {
-            "displayName": "Sync Sample"
-        },
-        "host": {
-            "type": "text",
-            "regex": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
-        },
-        "port": {
-            "type": "number",
-            "default": 443
-        },
-        "help": {
-            "type": "link",
-            "default": "<Help URL>"
-        },
-        "cert": {
-            "type": "password",
-            "optional": true
-        },
-        "sni": {
-            "type": "text",
-            "optional": true
-        },
-        "selfSignedCert": {
-            "type": "password",
-            "optional": true
-        }
+  "connection": {
+    "type": {
+      "displayName": "Sync Sample"
     },
-    "configuration": {
-        "auth": {
-            "type" : "fields",
-            "username": {
-                "type": "password"
-            },
-            "password": {
-                "type": "password"
-            }
-        }
+    "host": {
+      "type": "text",
+      "regex": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
+    },
+    "port": {
+      "type": "number",
+      "default": 443
+    },
+    "help": {
+      "type": "link",
+      "default": "<Help URL>"
+    },
+    "cert": {
+      "type": "password",
+      "optional": true
+    },
+    "sni": {
+      "type": "text",
+      "optional": true
+    },
+    "selfSignedCert": {
+      "type": "password",
+      "optional": true
     }
+  },
+  "configuration": {
+    "auth": {
+      "type": "fields",
+      "username": {
+        "type": "password"
+      },
+      "password": {
+        "type": "password"
+      },
+      "database": {
+        "type": "text"
+      }
+    }
+  }
 }
