@@ -10,7 +10,7 @@
     "key": "x__custom_property.magnitude",
     "cybox": false
   },
-  "SourceIpV4": [
+  "DIP": [
     {
       "key": "ipv4-addr.value",
       "object": "src_ip"
@@ -21,7 +21,7 @@
       "references": "src_ip"
     }
   ],
-  "DestinationIpV4": [
+  "SIP": [
     {
       "key": "ipv4-addr.value",
       "object": "dst_ip"
