@@ -11,6 +11,8 @@ Link to documentation: https://github.com/opencybersecurityalliance/stix-shifter
 
 Link to documentation on integrating connector to CP4S: https://github.com/opencybersecurityalliance/stix-shifter/tree/3.1.8/deployment/ibm_cloud_pak_for_security
 
+Link to IBM DB2 python api documentation: https://github.com/ibmdb/python-ibmdb/wiki/APIs
+
 # Documentation
 
 ## Initial installation and set up
