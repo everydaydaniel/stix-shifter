@@ -51,3 +51,8 @@ The Translation module is what is used to translate stix object notation to nati
 ```
 
 this tells the connector that values from the columns `SIP` and `DIP` from the datasource map over to an `ipv4-addr` stix object.
+
+### transmission module
+
+This module is where you define how to connect to your datasource and perform queries.
+We will be modifying the `api_client.py` file. This is where we define connection as well as queriying.

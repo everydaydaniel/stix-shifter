@@ -1,5 +1,8 @@
-from stix_shifter_utils.stix_transmission.utils.RestApiClient import RestApiClient
+import json
 import ibm_db
+
+from stix_shifter_utils.stix_transmission.utils.RestApiClient import RestApiClient
+from stix_shifter_modules.db2.utils.transform import time_transform
 
 class APIClient():
 
@@ -9,13 +12,13 @@ class APIClient():
         try:
             self.client = ibm_db.pconnect(
                 "DATABASE=" + self.auth.get("database") +
-                ";HOSTNAME=" + connection.get("host", "") +
-                ";PORT=" + str(connection.get("port", "31490")) +
+                ";HOSTNAME=" + connection.get("host") +
+                ";PORT=" + str(connection.get("port")) +
                 ";UID=" + self.auth.get("username") +
                 ";PWD=" + self.auth.get("password"),
                 "", "")
         except Exception as e:
-            print("ERROR IN DB2 CLIENT:", e)
+            print("Error connecting to DB2 CLIENT:", e)
             raise e
 
         self.state = ibm_db.active(self.client)
@@ -27,9 +30,26 @@ class APIClient():
             return {"code": 200, "success": True}
         return {"code": 400, "success": False}
 
+
     def get_search_results(self, search_id, range_start=None, range_end=None):
         # Return the search results. Results must be in JSON format before being translated into STIX
-        return {"code": 200, "data": "Results from search"}
+        # search_id == query in native query language
+        sql = search_id
+        stmt = ibm_db.exec_immediate(self.client, sql)
+        results_list = []
+        result = ibm_db.fetch_assoc(stmt)
+        num_rows = 0
+        while result is not False:
+                num_rows += 1
+                # Format datetime objects into strings
+                time_transform(result)
+                results_list.append(result)
+                result = ibm_db.fetch_assoc(stmt)
+
+        return_obj = dict()
+        return_obj["code"] = 200
+        return_obj["data"] = results_list
+        return {"code": 200, "data": results_list}
 
     def delete_search(self, search_id):
         # Optional since this may not be supported by the data source API
