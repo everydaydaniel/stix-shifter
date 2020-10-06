@@ -13,6 +13,8 @@ Link to documentation on integrating connector to CP4S: https://github.com/openc
 
 Link to IBM DB2 python api documentation: https://github.com/ibmdb/python-ibmdb/wiki/APIs
 
+Link to SILK documentation: https://tools.netsa.cert.org/silk/rwcut.html
+
 # Documentation
 
 ## Initial installation and set up
