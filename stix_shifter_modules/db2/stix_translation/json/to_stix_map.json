@@ -1,4 +1,8 @@
 {
+  "UID": {
+    "key": "user-account.user_id",
+    "transformer": "ToString"
+  },
   "DIP": [
     {
       "key": "ipv4-addr.value",
@@ -26,13 +30,11 @@
     }
   ],
   "STIME": {
-    "key": "last_observed",
-    "transformer": "DateTimeToUnixTimestamp",
+    "key": "first_observed",
     "cybox": false
   },
   "ETIME": {
-    "key": "first_observed",
-    "transformer": "DateTimeToUnixTimestamp",
+    "key": "last_observed",
     "cybox": false
   }
 }
