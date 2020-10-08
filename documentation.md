@@ -57,4 +57,10 @@ this tells the connector that values from the columns `SIP` and `DIP` from the d
 ### transmission module
 
 This module is where you define how to connect to your datasource and perform queries.
-We will be modifying the `api_client.py` file. This is where we define connection as well as queriying.
+We will be modifying the `api_client.py` file. This is where we define connection as well as querying.
+
+# TODO
+
+## bugs
+
+`ICMP_TYPE` and `ICMP_CODE` what do they do?
