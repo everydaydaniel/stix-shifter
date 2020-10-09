@@ -1,15 +1,15 @@
 {
   "connection": {
     "type": {
-      "displayName": "Sync Sample"
+      "displayName": "db2"
     },
     "host": {
       "type": "text",
       "regex": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
     },
     "port": {
-      "type": "number",
-      "default": 443
+      "type": "text",
+      "default": "443"
     },
     "help": {
       "type": "link",

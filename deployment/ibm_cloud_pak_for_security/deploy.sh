@@ -40,7 +40,7 @@ pip3 install virtualenv
 pip3 install venv-run
 
 
-virtualenv -p python3 virtualenv
+python3 -m venv virtualenv
 
 venv-run pip install -r requirements.txt
 venv-run pip install setuptools wheel twine
