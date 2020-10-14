@@ -2,7 +2,7 @@ import json
 import ibm_db
 
 from stix_shifter_utils.stix_transmission.utils.RestApiClient import RestApiClient
-from stix_shifter_modules.db2.utils.transform import Transformer
+from stix_shifter_modules.db2.utils.transform_results import Transformer
 
 class APIClient():
 

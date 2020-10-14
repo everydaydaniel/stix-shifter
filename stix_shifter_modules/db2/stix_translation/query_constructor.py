@@ -3,6 +3,7 @@ from stix_shifter_utils.stix_translation.src.patterns.pattern_objects import Obs
     CombinedComparisonExpression, CombinedObservationExpression, ObservationOperators
 from stix_shifter_utils.stix_translation.src.utils.transformers import TimestampToMilliseconds
 from stix_shifter_utils.stix_translation.src.json_to_stix import observable
+from stix_shifter_modules.db2.utils.transform_query import Transformer
 import logging
 import re
 
@@ -38,6 +39,7 @@ class QueryStringPatternTranslator:
     }
 
     def __init__(self, pattern: Pattern, data_model_mapper):
+        self.query_transformer = Transformer()
         self.dmm = data_model_mapper
         self.pattern = pattern
         self.translated = self.parse_expression(pattern)
@@ -133,6 +135,8 @@ class QueryStringPatternTranslator:
         if isinstance(expression, ComparisonExpression):  # Base Case
             # Resolve STIX Object Path to a field in the target Data Model
             stix_object, stix_field = expression.object_path.split(':')
+            if stix_object == 'ipv4-addr':
+                expression.value = self.query_transformer.transformIpv4(expression.value)
             # Multiple data source fields may map to the same STIX Object
             mapped_fields_array = self.dmm.map_field(stix_object, stix_field)
             # Resolve the comparison symbol to use in the query string (usually just ':')
@@ -141,6 +145,7 @@ class QueryStringPatternTranslator:
             if stix_field == 'start' or stix_field == 'end':
                 transformer = TimestampToMilliseconds()
                 expression.value = transformer.transform(expression.value)
+
 
             # Some values are formatted differently based on how they're being compared
             if expression.comparator == ComparisonComparators.Matches:  # needs forward slashes

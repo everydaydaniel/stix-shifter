@@ -1,4 +1,5 @@
 import json
+from os import path
 
 # key value switch
 def key_switch(dic):
@@ -11,9 +12,12 @@ def key_switch(dic):
 # Utilities for data transformations go in this class
 class Transformer():
     def __init__(self):
+        basepath = path.dirname(__file__)
+        protocol_map = "network_protocol_map.json"
+        filepath = path.abspath(path.join(basepath, ".." , "stix_translation" ,"json", protocol_map))
         # initialize json load
         try:
-            with open("stix_shifter_modules/db2/stix_translation/json/network_protocol_map.json") as json_file:
+            with open(filepath) as json_file:
                 self.protocols = json.load(json_file)
                 self.reverse_protocols = key_switch(self.protocols)
         except Exception as e:
@@ -24,8 +28,6 @@ class Transformer():
         value = str(result["PROTOCOL"])
         if value in self.reverse_protocols:
             result["PROTOCOL"] = self.reverse_protocols[value]
-
-
 
     # Transform from datetime.datetime(1,2,3) => miliseconds
     def time_transform(self, result):
