@@ -1,7 +1,7 @@
 {
   "connection": {
     "type": {
-      "displayName": "db2"
+      "displayName": "db2 (CP4D)"
     },
     "host": {
       "type": "text",

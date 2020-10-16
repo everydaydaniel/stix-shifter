@@ -41,7 +41,7 @@ class APIClient():
         results_list = []
         result = ibm_db.fetch_assoc(stmt)
         num_rows = 0
-        while result is not False:
+        while result is not False and num_rows < 10000:
                 num_rows += 1
                 # Format datetime objects into strings
                 transform.time_transform(result)

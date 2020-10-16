@@ -59,8 +59,11 @@ class AqlQueryStringPatternTranslator:
         # List for any queries that are split due to START STOP qualifier
         self.qualified_queries = []
         # Translated query string without any qualifiers
+        print("PATTERN", pattern)
         self.translated = self.parse_expression(pattern)
+        print("Translated", self.translated)
         self.qualified_queries.append(self.translated)
+        print("qualified_queries", self.qualified_queries)
 
         self.qualified_queries = _format_translated_queries(self.qualified_queries)
 
@@ -224,7 +227,7 @@ class AqlQueryStringPatternTranslator:
         # Special case where we want the risk finding
         if stix_object == 'x-ibm-finding' and stix_field == 'name' and expression.value == "*":
             return "devicetype = 18"
-        
+
         if stix_field == 'protocols[*]':
             map_data = _fetch_network_protocol_mapping()
             try:
@@ -265,6 +268,7 @@ class AqlQueryStringPatternTranslator:
             return "{}".format(comparison_string)
 
     def _parse_expression(self, expression, qualifier=None) -> str:
+        print()
         if isinstance(expression, ComparisonExpression):  # Base Case
             return self._parse_comparison_expression(self, expression, qualifier)
         elif isinstance(expression, CombinedComparisonExpression):
@@ -331,6 +335,7 @@ def _format_translated_queries(query_array):
     # Ex. START t'2014-04-25T15:51:20.000Z' to START 1398441080000
     formatted_queries = []
     for query in query_array:
+
         if _test_START_STOP_format(query):
             # Remove leading 't' before timestamps
             query = re.sub("(?<=START)t|(?<=STOP)t", "", query)
@@ -339,6 +344,7 @@ def _format_translated_queries(query_array):
             # Remove None array entries
             query_parts = list(map(lambda x: x.strip(), list(filter(None, query_parts))))
             if len(query_parts) == 5:
+                print("SKJHDFKBD", query_parts)
                 formatted_queries.append(_convert_timestamps_to_milliseconds(query_parts))
             else:
                 logger.info("Omitting query due to bad format for START STOP qualifier timestamp")
@@ -358,6 +364,7 @@ def translate_pattern(pattern: Pattern, data_model_mapping, options):
     translated_queries = translated_where_statements.qualified_queries
     for where_statement in translated_queries:
         has_start_stop = _test_START_STOP_format(where_statement)
+
         if(has_start_stop):
             queries.append("SELECT %s FROM %s WHERE %s" % (select_statement, data_model_mapping.dialect, where_statement))
         else:

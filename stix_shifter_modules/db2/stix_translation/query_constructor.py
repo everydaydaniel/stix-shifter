@@ -4,6 +4,7 @@ from stix_shifter_utils.stix_translation.src.patterns.pattern_objects import Obs
 from stix_shifter_utils.stix_translation.src.utils.transformers import TimestampToMilliseconds
 from stix_shifter_utils.stix_translation.src.json_to_stix import observable
 from stix_shifter_modules.db2.utils.transform_query import Transformer
+import datetime
 import logging
 import re
 
@@ -13,6 +14,10 @@ REFERENCE_DATA_TYPES = {"SourceIpV4": ["ipv4", "ipv4_cidr"],
                         "SourceIpV6": ["ipv6"],
                         "DestinationIpV4": ["ipv4", "ipv4_cidr"],
                         "DestinationIpV6": ["ipv6"]}
+
+START_STOP_STIX_QUALIFIER = "START((t'\d{4}(-\d{2}){2}T\d{2}(:\d{2}){2}(\.\d+)?Z')|(\s\d{13}\s))STOP"
+TIMESTAMP = "^'\d{4}(-\d{2}){2}T\d{2}(:\d{2}){2}(\.\d+)?Z'$"
+TIMESTAMP_MILLISECONDS = "\.\d+Z$"
 
 logger = logging.getLogger(__name__)
 
@@ -173,6 +178,7 @@ class QueryStringPatternTranslator:
             if qualifier is not None:
                 return "{} {}".format(comparison_string, qualifier)
             else:
+
                 return "{}".format(comparison_string)
 
         elif isinstance(expression, CombinedComparisonExpression):
@@ -180,6 +186,7 @@ class QueryStringPatternTranslator:
             expression_01 = self._parse_expression(expression.expr1)
             expression_02 = self._parse_expression(expression.expr2)
             if not expression_01 or not expression_02:
+
                 return ''
             if isinstance(expression.expr1, CombinedComparisonExpression):
                 expression_01 = "({})".format(expression_01)
@@ -187,8 +194,10 @@ class QueryStringPatternTranslator:
                 expression_02 = "({})".format(expression_02)
             query_string = "{} {} {}".format(expression_01, operator, expression_02)
             if qualifier is not None:
+
                 return "{} {}".format(query_string, qualifier)
             else:
+
                 return "{}".format(query_string)
         elif isinstance(expression, ObservationExpression):
             return self._parse_expression(expression.comparison_expression, qualifier)
@@ -198,6 +207,7 @@ class QueryStringPatternTranslator:
                 expression_01 = self._parse_expression(expression.observation_expression.expr1)
                 # qualifier only needs to be passed into the parse expression once since it will be the same for both expressions
                 expression_02 = self._parse_expression(expression.observation_expression.expr2, expression.qualifier)
+
                 return "{} {} {}".format(expression_01, operator, expression_02)
             else:
                 return self._parse_expression(expression.observation_expression.comparison_expression, expression.qualifier)
@@ -222,18 +232,68 @@ class QueryStringPatternTranslator:
     def parse_expression(self, pattern: Pattern):
         return self._parse_expression(pattern)
 
+def _test_or_add_milliseconds(timestamp) -> str:
+    if not _test_timestamp(timestamp):
+        raise ValueError("Invalid timestamp")
+    # remove single quotes around timestamp
+    timestamp = re.sub("'", "", timestamp)
+    # check for 3-decimal milliseconds
+    if not bool(re.search(TIMESTAMP_MILLISECONDS, timestamp)):
+        timestamp = re.sub('Z$', '.000Z', timestamp)
+    return timestamp
+
+
+def _test_START_STOP_format(query_string) -> bool:
+    # Matches STARTt'1234-56-78T00:00:00.123Z'STOPt'1234-56-78T00:00:00.123Z'
+    # or START 1234567890123 STOP 1234567890123
+    return bool(re.search(START_STOP_STIX_QUALIFIER, query_string))
+
+
+def _test_timestamp(timestamp) -> bool:
+    return bool(re.search(TIMESTAMP, timestamp))
+
+
+def _convert_timestamps_to_datetime(query_parts):
+    # grab time stamps from array
+    start_time = _test_or_add_milliseconds(query_parts[2])
+    stop_time = _test_or_add_milliseconds(query_parts[4])
+    transformer = TimestampToMilliseconds()
+    millisecond_start_time = transformer.transform(start_time)
+    millisecond_stop_time = transformer.transform(stop_time)
+    base_datetime = datetime.datetime( 1970, 1, 1 )
+    datetime_start_delta, datetime_stop_delta = datetime.timedelta( 0, 0, 0, millisecond_start_time ), datetime.timedelta( 0, 0, 0, millisecond_stop_time )
+    datetime_start = base_datetime + datetime_start_delta
+    datetime_stop = base_datetime + datetime_stop_delta
+    query = [query_parts[0], datetime_start, datetime_stop]
+
+    return query
+
 
 def translate_pattern(pattern: Pattern, data_model_mapping, options):
     # Query result limit and time range can be passed into the QueryStringPatternTranslator if supported by the data source.
     # result_limit = options['result_limit']
     # time_range = options['time_range']
     query = QueryStringPatternTranslator(pattern, data_model_mapping).translated
-    # Add space around START STOP qualifiers
-    query = re.sub("START", "START ", query)
-    query = re.sub("STOP", " STOP ", query)
+    has_start_stop = False
+    if _test_START_STOP_format(query):
+        has_start_stop = True
+        # Remove leading 't' before timestamps
+        query = re.sub("(?<=START)t|(?<=STOP)t", "", query)
+        # Split individual query to isolate timestamps
+        query_parts = re.split("(START)|(STOP)", query)
+        # Remove None array entries
+        query_parts = list(map(lambda x: x.strip(), list(filter(None, query_parts))))
+        if len(query_parts) == 5:
+            where_statement, start_time, end_time = _convert_timestamps_to_datetime(query_parts)
+        else:
+            logger.info("Omitting query due to bad format for START STOP qualifier timestamp")
+
+
 
     # This sample return statement is in an SQL format. This should be changed to the native data source query language.
     # If supported by the query language, a limit on the number of results should be added to the query as defined by options['result_limit'].
     # Translated patterns must be returned as a list of one or more native query strings.
     # A list is returned because some query languages require the STIX pattern to be split into multiple query strings.
+    if has_start_stop:
+        return ["SELECT * FROM BIGSQL.EINSTEIN WHERE {} AND (STIME >= '{}') AND (ETIME <= '{}')".format(where_statement, start_time, end_time)]
     return ["SELECT * FROM BIGSQL.EINSTEIN WHERE %s" % query]
