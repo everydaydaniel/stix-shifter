@@ -1,5 +1,7 @@
 import json
+from datetime import datetime, timezone
 from os import path
+
 
 # key value switch
 def key_switch(dic):
@@ -31,5 +33,9 @@ class Transformer():
 
     # Transform from datetime.datetime(1,2,3) => miliseconds
     def time_transform(self, result):
-        result['STIME'] = result['STIME'].strftime("%s")
-        result['ETIME'] = result['ETIME'].strftime("%s")
+        start = datetime.timestamp(result['STIME'])
+        end = datetime.timestamp(result['ETIME'])
+        start = datetime.fromtimestamp(int(start), timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        end = datetime.fromtimestamp(int(end), timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        result['STIME'] = start
+        result['ETIME'] = end

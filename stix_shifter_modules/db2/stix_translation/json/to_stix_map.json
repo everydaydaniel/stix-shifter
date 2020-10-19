@@ -37,8 +37,7 @@
     "cybox": false
   },
   "ETIME": {
-    "key": "first_observed",
-    "transformer": "EpochToTimestamp",
+    "key": "last_observed",
     "cybox": false
   },
   "FLAGS": {
@@ -113,8 +112,7 @@
     "transformer": "ToInteger"
   },
   "STIME": {
-    "key": "last_observed",
-    "transformer": "EpochToTimestamp",
+    "key": "first_observed",
     "cybox": false
   },
   "TIMEOUT": {
